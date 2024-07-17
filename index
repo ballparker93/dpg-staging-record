@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="csrf-token" content="Mi1YHun50XgkSpZKIyF1ijAFZ7EbkY8FJWKegkT5">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="/css/styles.css" />
+
+    <style>
+        .left {
+            display: inline-block;
+        }
+
+        .right {
+            display: inline-block;
+        }
+    </style>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <title>DPG Staging Record</title>
+</head>
+<body>
+    <div class="container">
+        <div class="alert alert-success"></div>
+        <div class="wrapper">
+            <div class="wrapperFloat">
+                <header class="masthead" id="masthead">
+                    <div class="utilityNav"></div>
+                    <div class="title">
+                        <h1>DPG Online</h1>
+                        <h2>Record DPG for job seekers here</h2>
+                    </div><!-- END: title -->
+                </header><!-- END: masthead -->
+
+                <main class="contentWrapper">
+                    <div class="row"></div>
+                    <div id="MainContent">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="left">
+                                    <br><br><label for="section">Job Seeker Name:</label>
+                                    <select name="section" id="section" class="form-control" required>
+                                        <option value="">-- Please Select --</option>
+                                    </select>
+                                </div>
+                                <div class="right">
+                                    <a href="/pdf" target="_blank" class="btn btn-success">PRINT PDF</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form name="QuestionForm" id="QuestionForm" method="post">
+                                    <input type="hidden" name="_token" id="_token" value="Mi1YHun50XgkSpZKIyF1ijAFZ7EbkY8FJWKegkT5" />
+                                    <h2>Stage One: Home and Neighborhood Observation</h2>
+                                    <div>
+                                        <label for="question_1">People Interviewed and Relationship to Individual</label>
+                                        <textarea class="form-control" name="question_1" id="question_1"></textarea>
+                                    </div>
+                                    <br />
+                                    <div>
+                                        <div style="margin-top: 20px;">
+                                            <button type="button" name="submit_stay" id="submit_stay" class="btn btn-primary">SAVE</button>
+                                            &nbsp;&nbsp;&nbsp;
+                                        </div>
+                                        <div class="modal_container"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                <footer class="footer"></footer>
+            </div><!-- END: wrapperFloat -->
+        </div><!-- END: wrapper -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/scripts/jobTable.js"></script>
+    <script src="/scripts/planTable.js"></script>
+    <script src="/scripts/paymentTable.js"></script>
+    <script src="/scripts/incomeTable.js"></script>
+    <script src="/scripts/collegeTable.js"></script>
+    <script src="/scripts/expenses.js"></script>
+    <script src="/scripts/questionModal.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function() {
+            google.script.run.withSuccessHandler(function(columnData) {
+                const dropdown = $('#section');
+                columnData.forEach(value => {
+                    dropdown.append(new Option(value, value));
+                });
+            }).getDropdownOptions();
+
+            $('#section').change(function() {
+                const jobSeeker = $(this).val();
+                if (jobSeeker) {
+                    google.script.run.withSuccessHandler(function(data) {
+                        $('#question_1').val(data);
+                    }).getJobSeekerData(jobSeeker);
+                } else {
+                    $('#question_1').val('');
+                }
+            });
+
+            $('#submit_stay, #submit_next').click(function() {
+                const jobSeeker = $('#section').val();
+                const peopleInterviewed = $('#question_1').val();
+
+                if (jobSeeker && peopleInterviewed) {
+                    google.script.run.withSuccessHandler(function(response) {
+                        console.log(response);
+                        alert('Data saved successfully!');
+                    }).saveFormData(jobSeeker, peopleInterviewed);
+                } else {
+                    alert('Please fill out all fields before submitting.');
+                }
+            });
+
+            if ($('[type="date"]').prop('type') != 'date') {
+                $('[type="date"]').datepicker({ dateFormat: 'mm/dd/yy' });
+            }
+        });
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TX44CEPG9M"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-TX44CEPG9M');
+    </script>
+</body>
+</html>
