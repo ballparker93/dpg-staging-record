@@ -1,0 +1,106 @@
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('Index');
+}
+
+function getDropdownOptions() {
+  const apiKey = "3XwHjSVXWtoFFZwsP9PmkTBDMmMNBVttNRoGL";
+  const sheetId = "6370870289190788";
+  const columnId = "2169443204681604";
+  const url = `https://api.smartsheet.com/2.0/sheets/${sheetId}`;
+
+  const options = {
+    method: 'get',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const data = JSON.parse(response.getContentText());
+
+  const columnData = data.rows.map(row => {
+    const cell = row.cells.find(cell => cell.columnId == columnId);
+    return cell ? cell.value : null;
+  }).filter(value => value !== null);
+
+  return columnData;
+}
+
+function saveFormData(jobSeeker, peopleInterviewed) {
+  const apiKey = "3XwHjSVXWtoFFZwsP9PmkTBDMmMNBVttNRoGL";
+  const sheetId = "6370870289190788";
+  const jobSeekerColumnId = "2169443204681604";
+  const targetColumnId = "2080201434681220";
+  const url = `https://api.smartsheet.com/2.0/sheets/${sheetId}`;
+
+  const options = {
+    method: 'get',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const data = JSON.parse(response.getContentText());
+
+  const rowToUpdate = data.rows.find(row => {
+    const cell = row.cells.find(cell => cell.columnId == jobSeekerColumnId);
+    return cell && cell.value === jobSeeker;
+  });
+
+  if (rowToUpdate) {
+    const rowId = rowToUpdate.id;
+    const updateUrl = `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}`;
+    const updateOptions = {
+      method: 'put',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      payload: JSON.stringify({
+        cells: [{
+          columnId: targetColumnId,
+          value: peopleInterviewed
+        }]
+      })
+    };
+
+    const updateResponse = UrlFetchApp.fetch(updateUrl, updateOptions);
+    return updateResponse.getContentText();
+  } else {
+    return 'Job Seeker not found';
+  }
+}
+
+function getJobSeekerData(jobSeeker) {
+  const apiKey = "3XwHjSVXWtoFFZwsP9PmkTBDMmMNBVttNRoGL";
+  const sheetId = "6370870289190788";
+  const jobSeekerColumnId = "2169443204681604";
+  const targetColumnId = "2080201434681220";
+  const url = `https://api.smartsheet.com/2.0/sheets/${sheetId}`;
+
+  const options = {
+    method: 'get',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const data = JSON.parse(response.getContentText());
+
+  const row = data.rows.find(row => {
+    const cell = row.cells.find(cell => cell.columnId == jobSeekerColumnId);
+    return cell && cell.value === jobSeeker;
+  });
+
+  if (row) {
+    const cell = row.cells.find(cell => cell.columnId == targetColumnId);
+    return cell ? cell.value : '';
+  } else {
+    return '';
+  }
+}
